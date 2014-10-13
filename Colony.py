@@ -1,45 +1,11 @@
 import pygame
 import numpy as np
 import random
-
-# Define some colors
-BLACK    = (   0,   0,   0)
-WHITE    = ( 255, 255, 255)
-
-RED      = ( 255,   0,   0)
-GREEN    = (   0, 255,   0)
-BLUE    = (   0, 0,   255)
+import game
+import Ant
 
 
-class Ant(pygame.sprite.Sprite):
-    
-    def moveTo(self,x=0, y=0):
-        self.rect.x = x
-        self.rect.y = y
 
-    def __init__(self, color, x, y, width, height):
-        """ Constructor. Pass in the color of the block,
-        and its x and y position. """
- 
-        # Call the parent class (Sprite) constructor
-        pygame.sprite.Sprite.__init__(self)
-        #self.screen = screen
-        self.color = color
-        self.width = width
-        self.height = height
-    
-        self.image = pygame.Surface([width, height])
-        self.image.fill(color)
-        self.image.set_colorkey(WHITE)
-        self.rect = self.image.get_rect()
-
-        self.rect.x = x
-        self.rect.y = y
-            
-        self.position = (x,y,self.width,self.height)          
-
-    def update(self):
-        pass
 
 
 
@@ -55,7 +21,7 @@ screen = pygame.display.set_mode(size)
 
 
 # Clear the screen and set the screen background
-screen.fill(WHITE)
+screen.fill(game.WHITE)
 
 
 
@@ -79,26 +45,21 @@ for i in range( 1000 ):
         if not gameMap[x][y]:
             # Seed with an ant
             gameMap[x][y] = 1
-            ants.add( Ant( RED, x*grid_size, y*grid_size, grid_size, grid_size ) )
+            ants.add( Ant( game.RED, x, y, grid_size ) )
     except IndexError:
         print x,y
         print gameMap.shape
 
 
-"""
-ant_size = 10
-for i in range(500):
-    x,y = random.randrange(SCREEN_WIDTH-ant_size), random.randrange(SCREEN_HEIGHT-ant_size)
-    ant = Ant(RED, x, y, ant_size, ant_size)
-    collisions = pygame.sprite.spritecollide(ant, ants, False)
 
-    while len(collisions):
-        x,y = random.randrange(SCREEN_WIDTH-ant_size), random.randrange(SCREEN_HEIGHT-ant_size)
-        ant.moveTo(random.randrange(SCREEN_WIDTH-ant_size), random.randrange(SCREEN_HEIGHT-ant_size))
-        collisions = pygame.sprite.spritecollide(ant, ants, False)
-    ants.add( ant )
-"""	
-	
+
+
+def isVacant(x,y):
+    if x < len(gameMap) and y < len(gameMap[0]):
+        return not gameMap[x][y]
+    else:
+        return False
+
 
  
 # -------- Main Program Loop -----------
@@ -114,6 +75,36 @@ while not done:
  
     # --- Game logic should go here
  
+    for ant in ants:
+        if random.random() > 0.0:
+            d = random.randint(1,8)
+            if d == 1:
+                if isVacant( ant.x, ant.y+1 ):
+                    ant.moveTo(ant.x,ant.y+1)
+            elif d ==2:
+                if isVacant( ant.x+1, ant.y+1 ):
+                    ant.moveTo(ant.x+1,ant.y+1)
+            elif d ==3:
+                if isVacant( ant.x+1, ant.y ):
+                    ant.moveTo(ant.x+1,ant.y)
+            elif d ==4:
+                if isVacant( ant.x+1, ant.y-1 ):
+                    ant.moveTo(ant.x+1,ant.y-1)
+            elif d ==5:
+                if isVacant( ant.x, ant.y-1 ):
+                    ant.moveTo(ant.x,ant.y-1)
+            elif d ==6:
+                if isVacant( ant.x-1, ant.y-1 ):
+                    ant.moveTo(ant.x-1,ant.y-1)
+            elif d ==7:
+                if isVacant( ant.x-1, ant.y ):
+                    ant.moveTo(ant.x-1,ant.y)
+            elif d ==8:
+                if isVacant( ant.x-1, ant.y+1 ):
+                    ant.moveTo(ant.x-1,ant.y+1)
+                
+
+
     # --- Drawing code should go here
     # First, clear the screen to white. Don't put other drawing commands
     # above this, or they will be erased with this command.
@@ -126,7 +117,8 @@ while not done:
     pygame.display.flip()
  
     # --- Limit to 60 frames per second
-    clock.tick(60)
+    clock.tick(10)
+
     
     
     
