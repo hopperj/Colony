@@ -26,8 +26,8 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.gameMap = np.zeros( (self.SCREEN_WIDTH/self.grid_size, \
-                                  self.SCREEN_HEIGHT/self.grid_size) )
+        self.gameMap = np.zeros( (self.Config.bigmapwidth/self.Config.grid_size, \
+                                  self.Config.bigmapwidth/self.Config.grid_size) )
 
         self.done = False
 
@@ -41,27 +41,24 @@ class Game:
         self.initAnts()
 
 
-        self.goal = [ self.SCREEN_WIDTH/( 2*self.grid_size ), \
-                      self.SCREEN_HEIGHT/( 2*self.grid_size) ]
+        self.goal = [ self.Config.bigmapwidth/( 2*self.Config.grid_size ), \
+                      self.Config.bigmapheight/( 2*self.Config.grid_size) ]
         #self.seedMap()
 
-
-        self.mapX = 0
-        self.mapY = 0
 
 
     def initWalls(self):
         self.walls = pygame.sprite.Group()
 
         for i in range(self.numberOfWallSeeds):
-            x = random.randint( 0, (self.SCREEN_WIDTH/self.grid_size)-1 )
-            y = random.randint( 0, (self.SCREEN_HEIGHT/self.grid_size)-1 )           
+            x = random.randint( 0, (self.Config.bigmapwidth/self.Config.grid_size)-1 )
+            y = random.randint( 0, (self.Config.bigmapheight/self.Config.grid_size)-1 )           
             try:
                 # If there isn't already something there
                 if not self.gameMap[x][y]:
                     #Seed the wall
                     self.gameMap[x][y] = 2
-                    self.walls.add( Wall( BLACK, x, y, self.grid_size ) )
+                    self.walls.add( Wall( BLACK, x, y, self.Config.grid_size ) )
                     self.spreadWalls(x,y,x,y)
             except IndexError:
                 print "Wall:",x,y
@@ -77,7 +74,7 @@ class Game:
                 dist = np.sqrt( (x0-x)**2 + (y0-y)**2 )
                 if random.random() < self.wallSpreadProb/dist:
                     self.gameMap[x][y] = 2
-                    self.walls.add( Wall( BLACK, x, y, self.grid_size ) )
+                    self.walls.add( Wall( BLACK, x, y, self.Config.grid_size ) )
                     self.spreadWalls(x,y,x0,y0)
 
 
@@ -88,14 +85,14 @@ class Game:
         for i in range( self.numberOfAnts ):
             for j in range(200):
                 # 200 attempt to find a valid place
-                x = random.randint( 0, (self.SCREEN_WIDTH/self.grid_size)-1 )
-                y = random.randint( 0, (self.SCREEN_HEIGHT/self.grid_size)-1 )
+                x = random.randint( 0, (self.Config.bigmapwidth/self.Config.grid_size)-1 )
+                y = random.randint( 0, (self.Config.bigmapheight/self.Config.grid_size)-1 )
                 print x,y
                 try:
                     if not self.gameMap[x][y]:
                         # Seed with an ant
                         self.gameMap[x][y] = 1
-                        self.ants.add( Ant( RED, x, y, self.grid_size, moveCD=0.5*self.FPS ) )
+                        self.ants.add( Ant( RED, x, y, self.Config.grid_size, moveCD=0.5*self.Config.FPS ) )
                         print "Created an Ant!"
                         break
                 except IndexError:
@@ -133,8 +130,8 @@ class Game:
         # ------- background is a subsurface of bigmap ----------
         self.background = pygame.Surface((self.screen.get_size()))
         self.backgroundrect = self.background.get_rect()
-        self.background = self.bigmap.subsurface((self.Config.cornerpoint[0],
-                                        self.Config.cornerpoint[1],
+        self.background = self.bigmap.subsurface((self.Config.mapX,
+                                        self.Config.mapY,
                                         self.Config.width,
                                         self.Config.height)) # take snapshot of bigmap
         # -----------------------------------
@@ -142,9 +139,9 @@ class Game:
         self.screen.blit(self.background, (0,0)) # delete all
 
 
+        self.allgroup = pygame.sprite.LayeredUpdates()
 
-
-        
+        """
         self.screen = pygame.display.set_mode(self.screen_size)
         self.bigMap = pygame.Surface( (1600,1600) )
         self.bigMap.fill( WHITE )
@@ -157,7 +154,7 @@ class Game:
         
         self.background = self.background.convert()
         self.screen.blit( self.background, (0,0) )
-
+        """
 
 
 
@@ -167,13 +164,13 @@ class Game:
     def seedMap(self):
         
         for i in range( 1000 ):
-            x = random.randint( 0, (self.SCREEN_WIDTH/self.grid_size)-1 )
-            y = random.randint( 0, (self.SCREEN_HEIGHT/self.grid_size)-1 )
+            x = random.randint( 0, (self.Config.bigmapwidth/self.Config.grid_size)-1 )
+            y = random.randint( 0, (self.Config.bigmapheight/self.Config.grid_size)-1 )
             try:
                 if not self.gameMap[x][y]:
                     # Seed with an ant
                     self.gameMap[x][y] = 1
-                    self.ants.add( Ant( RED, x, y, self.grid_size ) )
+                    self.ants.add( Ant( RED, x, y, self.Config.grid_size ) )
             except IndexError:
                 print x,y
                 print self.gameMap.shape
@@ -249,13 +246,19 @@ class Game:
         # --- Drawing code should go here
         # First, clear the screen to white. Don't put other drawing commands
         # above this, or they will be erased with this command.
-        #self.screen.fill(WHITE)
-        self.screen.blit( self.background, (0,0))
+        self.screen.fill(WHITE)
+        if self.Config.scrollx == 0 and self.Config.scrolly == 0:
+            self.allgroup.clear( self.screen, self.background )
+        else:
+            #self.Config.mapX = self.Config.scrollx
+            #self.Config.mapY = self.Config.scrolly
+            print self.Config.mapX,self.Config.mapY, self.Config.width, self.Config.height, self.Config.bigmapwidth, self.Config.bigmapheight
+            self.background = self.bigmap.subsurface((self.Config.mapX,
+                                                        self.Config.mapY,
+                                                        self.Config.width,
+                                                        self.Config.height)) # take snapshot of bigmap
+            self.screen.blit( self.background, (0,0))
 
-        self.background = self.screen.subsurface((self.mapX,
-                                                    self.mapY,
-                                                    400,
-                                                    400)) # take snapshot of bigmap
         self.ants.update()    
         self.walls.update()
 
@@ -265,7 +268,7 @@ class Game:
         pygame.display.flip()
 
         # --- Limit to 60 frames per second
-        self.clock.tick(30)
+        self.clock.tick( self.Config.FPS )
 
 
 

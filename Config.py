@@ -4,22 +4,26 @@ class Config:
 
 
     def __init__(self):
-        title = "Scrolling test"
-        fps = 60
-        playtime = 0
+        self.title = "Scrolling test"
+        self.FPS = 60
+        self.playtime = 0
 
-        xtiles = 1600
-        ytiles = 1600
+        self.xtiles = 1600
+        self.ytiles = 1600
 
-        width = 400
-        height = 400
+        self.width = 400
+        self.height = 400
 
-        bigmapwidth = 1600
-        bigmapheight = 1600
+        self.bigmapwidth = 1600
+        self.bigmapheight = 1600
 
-        cornerpoint=[0,0]
+        self.scrollstepx = 50
+        self.scrollstepy = 50
 
-        scrollstepx = 5
-        scrollstepy = 5
+        self.scrollx = 0
+        self.scrolly = 0
 
+        self.grid_size = 5
 
+        self.mapX = 0
+        self.mapY = 0
