@@ -18,7 +18,8 @@ SCREEN_HEIGHT = 800
 game = Game(sw=SCREEN_WIDTH,sh=SCREEN_HEIGHT)
 
 done = False
- 
+mapY = 0
+mapX = 0
 # -------- Main Program Loop -----------
 while not done:
     # --- Main event loop
@@ -33,6 +34,18 @@ while not done:
             done = True
             break
         
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+            game.mapY -= 5
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+            game.mapY += 5
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            game.mapX -= 5
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            game.mapX += 5
+
+
+        
+
 
 
     game.run()
