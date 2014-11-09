@@ -12,16 +12,16 @@ import random
 
 
 from Ant import Ant
+from Config import Config
+
 
 class Game:
 
 
-    def __init__(self,sw=800, sh=800):
-        self.SCREEN_WIDTH = sw
-        self.SCREEN_HEIGHT = sh
+    def __init__(self):
 
-        self.screen_size = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-        self.grid_size = 5
+        self.Config = Config()
+
 
 
         self.clock = pygame.time.Clock()
@@ -30,7 +30,6 @@ class Game:
                                   self.SCREEN_HEIGHT/self.grid_size) )
 
         self.done = False
-        self.FPS = 60
 
         self.numberOfAnts = 5
         self.numberOfWallSeeds = 50
@@ -104,9 +103,66 @@ class Game:
                     print self.gameMap.shape
 
     def initScreen(self):
+
+
+        self.screen=pygame.display.set_mode((self.Config.width,self.Config.height)) 
+        # note that "map" is an pygame function and can not be used as a name for a variable
+        self.bigmap = pygame.Surface((self.Config.bigmapwidth, self.Config.bigmapheight))
+        # ----------------- create bigmap -------------------
+        self.bigmap.fill((128,128,128)) # fill grey
+
+
+
+
+        # paint a grid of dark lines
+        for x in range(0,self.Config.bigmapwidth,self.Config.bigmapwidth/self.Config.xtiles): #start, stop, step
+            pygame.draw.line(self.bigmap, (64,64,64), (x,0), (x,self.Config.bigmapheight))
+        for y in range(0,self.Config.bigmapheight,self.Config.bigmapheight/self.Config.ytiles): #start, stop, step
+            pygame.draw.line(self.bigmap, (64,64,64), (0,y), (self.Config.bigmapwidth,y))
+        pygame.draw.rect(self.bigmap, (255,0,0), (0,0,self.Config.bigmapwidth, self.Config.bigmapheight), 25) # red bigmap edge
+        # paint thin red cross in the middle of the map
+        pygame.draw.line(self.bigmap, (200,0,0), (self.Config.bigmapwidth /2, 0),( self.Config.bigmapwidth / 2, self.Config.bigmapheight),1)
+        pygame.draw.line(self.bigmap, (200,0,0), (0, self.Config.bigmapheight/2),( self.Config.bigmapwidth , self.Config.bigmapheight/2),1)
+
+
+
+
+
+
+        self.bigmap = self.bigmap.convert()
+        # ------- background is a subsurface of bigmap ----------
+        self.background = pygame.Surface((self.screen.get_size()))
+        self.backgroundrect = self.background.get_rect()
+        self.background = self.bigmap.subsurface((self.Config.cornerpoint[0],
+                                        self.Config.cornerpoint[1],
+                                        self.Config.width,
+                                        self.Config.height)) # take snapshot of bigmap
+        # -----------------------------------
+        self.background = self.background.convert()
+        self.screen.blit(self.background, (0,0)) # delete all
+
+
+
+
+        
         self.screen = pygame.display.set_mode(self.screen_size)
-        self.screen.fill(WHITE)
+        self.bigMap = pygame.Surface( (1600,1600) )
+        self.bigMap.fill( WHITE )
+        self.bigMap.convert()
+
+
+        self.background = pygame.Surface( ( self.screen.get_size() ))
+        self.backgroundRect = self.background.get_rect()
+        self.background = self.bigMap.subsurface(( 0,0, 400, 400 ))
+        
+        self.background = self.background.convert()
+        self.screen.blit( self.background, (0,0) )
+
+
+
+
         pygame.display.set_caption("Colony")
+
 
     def seedMap(self):
         
@@ -194,11 +250,12 @@ class Game:
         # First, clear the screen to white. Don't put other drawing commands
         # above this, or they will be erased with this command.
         #self.screen.fill(WHITE)
-        background = self.screen.subsurface((self.mapX,
-                                        self.mapY,
-                                        200,
-                                        200)) # take snapshot of bigmap
-        self.screen.blit(background, (0,0))
+        self.screen.blit( self.background, (0,0))
+
+        self.background = self.screen.subsurface((self.mapX,
+                                                    self.mapY,
+                                                    400,
+                                                    400)) # take snapshot of bigmap
         self.ants.update()    
         self.walls.update()
 
